@@ -71,6 +71,7 @@ class User extends Authenticatable
     public function menus()
     {
         return Menu::whereNull('parent_id')
+                    ->where('enable', true)
                     ->where(function (Builder $query) {
                         $permissions = $this->permissions->pluck('id')->push(...$this->roles->pluck('permissions')->flatten()->pluck('id'));
 
