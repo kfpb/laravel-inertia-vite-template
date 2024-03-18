@@ -46,7 +46,7 @@ const fetch = async () => {
 onMounted(resize)
 onUpdated(resize)
 onMounted(fetch)
-onUpdated(fetch)
+// onUpdated(fetch)
 </script>
 
 <template>

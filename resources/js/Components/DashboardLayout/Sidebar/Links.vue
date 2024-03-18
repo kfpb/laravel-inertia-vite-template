@@ -27,7 +27,7 @@ const active = childs.find(trace)
 const self = getCurrentInstance()
 const show = ref(open ? (active ? true : false) : false)
 const fetch = async () => {
-  if (!menu.counter_handler) {
+  if (childs.filter(child => child.counter_handler).length === 0) {
     return
   }
   try {
@@ -56,7 +56,7 @@ const resize = () => {
 onMounted(resize)
 onMounted(fetch)
 onUpdated(resize)
-onUpdated(fetch)
+// onUpdated(fetch)
 </script>
 
 <style scoped>
