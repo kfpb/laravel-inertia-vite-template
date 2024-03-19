@@ -340,4 +340,56 @@ class MenuController extends Controller
     {
         return $total + $menu->counter?->count() + $menu->childs->reduce([$this, 'counters'], 0);
     }
+
+    /**
+     * @param \App\Models\Menu $menu
+     * @return \Illuminate\Http\Response
+     */
+    public function toggle(Menu $menu)
+    {
+        $newState = ! $menu->enable;
+
+        DB::beginTransaction();
+
+        try {
+            $menu->update([
+                'enable' => $newState,
+            ]);
+
+            if ($newState && $menu->parent_id) {
+                $this->updateRecursiveParentWhenNotEnabled($menu);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', __(
+                'menu `:name` has been :status', [
+                    'name' => $menu->name,
+                    'status' => $menu->enable ? 'enabled' : 'disabled',
+                ]
+            ));
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', __(
+                $e->getMessage(),
+            ));
+        }
+    }
+
+    /**
+     * @param \App\Models\Menu $menu
+     */
+    private function updateRecursiveParentWhenNotEnabled(Menu $menu)
+    {
+        $parent = $menu->parent;
+        
+        if ($parent) {
+            $parent->update([
+                'enable' => true,
+            ]);
+
+            $this->updateRecursiveParentWhenNotEnabled($parent);
+        }
+    }
 }

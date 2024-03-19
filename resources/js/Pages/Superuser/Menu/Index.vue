@@ -120,6 +120,26 @@ const destroy = async menu => {
   })
 }
 
+const toggle = async menu => {
+  const response = await Swal.fire({
+    title: 'Confirmation',
+    text: `Are you sure to ${menu.enable ? 'deactivate' : 'activate'} ${menu.name} menu ?`,
+    icon: 'question',
+    showCloseButton: true,
+    showCancelButton: true,
+  })
+
+  response.isConfirmed && useForm({}).patch(route('superuser.menu.toggle', menu.id), {
+    onSuccess: () => {
+      try {
+        Inertia.get(route(route().current()))
+      } catch (e) {
+        console.log(e)
+      }
+    }
+  })
+}
+
 const submit = () => form.id ? update() : store()
 
 const timeout = ref(null)
@@ -151,16 +171,45 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
   >
     <Card class="bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
       <template #header>
-        <div class="flex items-center space-x-2 p-2 bg-gray-200 dark:bg-gray-800">
-          <ButtonGreen
-            v-if="can('create menu')"
-            @click.prevent="form.id = null; show()"
-          >
-            <Icon name="plus" />
-            <p class="uppercase font-semibold">
-              {{ __('create') }}
-            </p>
-          </ButtonGreen>
+        <div class="flex items-center justify-between space-x-2 p-2 rounded-md bg-gray-200 dark:bg-gray-800">
+          <div>
+            <ButtonGreen
+              v-if="can('create menu')"
+              @click.prevent="form.id = null; show()"
+            >
+              <Icon name="plus" />
+              <p class="uppercase font-semibold">
+                {{ __('create') }}
+              </p>
+            </ButtonGreen>
+          </div>
+          <!-- Legend -->
+          <div class="flex items-center justify-around space-x-2 text-sm">
+            <div class="flex items-center justify-start space-x-2">
+              <Icon name="edit" class="bg-blue-600 px-2 py-1 rounded-md text-sm text-white" />
+              <p class="capitalize font-semibold">
+                : {{ __('edit') }}
+              </p>
+            </div>
+            <div class="flex items-center justify-start space-x-2">
+              <Icon name="eye" class="bg-green-500 px-2 py-1 rounded-md text-sm text-white" />
+              <p class="capitalize font-semibold">
+                : {{ __('aktif') }}
+              </p>
+            </div>
+            <div class="flex items-center justify-start space-x-2">
+              <Icon name="eye-slash" class="bg-yellow-500 px-2 py-1 rounded-md text-sm text-black" />
+              <p class="capitalize font-semibold">
+                : {{ __('tidak aktif') }}
+              </p>
+            </div>
+            <div class="flex items-center justify-start space-x-2">
+              <Icon name="trash" class="bg-red-600 px-2 py-1 rounded-md text-sm text-white" />
+              <p class="capitalize font-semibold">
+                : {{ __('hapus') }}
+              </p>
+            </div>
+          </div>
         </div>
       </template>
 
@@ -170,6 +219,7 @@ onUnmounted(() => window.removeEventListener('keydown', esc))
             :menus="menus"
             :edit="edit"
             :destroy="destroy"
+            :toggle="toggle"
             :save="save"
           />
         </div>
